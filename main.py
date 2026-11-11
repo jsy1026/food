@@ -12,8 +12,14 @@ st.write("영양성분을 입력하면 식품 유형을 예측합니다.")
 
 uploaded_file = st.file_uploader("음식 DB 엑셀 파일 업로드", type=["xlsx"])
 
-if uploaded_file is not None:
-    df = pd.read_excel(uploaded_file)
+from pathlib import Path
+
+# GitHub에 저장된 엑셀 파일 자동 불러오기
+file_path = Path(__file__).parent / "20260828_음식DB_19617건.xlsx"
+
+df = pd.read_excel(file_path)
+
+st.success("식품 데이터 자동 불러오기 완료!")
 
     st.subheader("데이터 미리보기")
     st.dataframe(df.head())
@@ -95,6 +101,3 @@ if uploaded_file is not None:
 
             st.subheader("식품 유형별 데이터 수")
             st.bar_chart(data[target].value_counts())
-
-else:
-    st.info("먼저 음식 DB 엑셀 파일을 업로드해 주세요.")
