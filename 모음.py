@@ -11,8 +11,9 @@ from sklearn.metrics import accuracy_score
 BASE_DIR = Path(__file__).parent
 FILE_PATH = BASE_DIR / "20260828_음식DB_19617건.xlsx"
 
-# 예측할 대상과 영양 성분
+# 예측 대상과 영양 성분
 TARGET = "식품대분류명"
+FOOD_NAME = "식품명"
 
 FEATURES = [
     "에너지(kcal)",
@@ -34,7 +35,7 @@ def load_data():
     return pd.read_excel(FILE_PATH)
 
 
-# AI 학습에 사용할 데이터 정리
+# AI 학습용 데이터 정리
 @st.cache_data
 def prepare_data():
     df = load_data()
@@ -56,7 +57,7 @@ def prepare_data():
 
     data = data.dropna()
 
-    # 데이터가 너무 적은 식품 유형은 제외
+    # 데이터가 10개 미만인 식품 유형은 제외
     counts = data[TARGET].value_counts()
     valid_categories = counts[counts >= 10].index
     data = data[data[TARGET].isin(valid_categories)]
@@ -67,7 +68,7 @@ def prepare_data():
     return data
 
 
-# AI 모델 학습 및 정확도 계산
+# AI 모델 학습
 @st.cache_resource
 def get_model():
     data = prepare_data()
