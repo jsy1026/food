@@ -1,15 +1,17 @@
 import streamlit as st
+
 from 모음 import load_data
 
-st.set_page_config(page_title="데이터 탐색", page_icon="📁")
+st.set_page_config(
+    page_title="데이터 탐색",
+    page_icon="📁"
+)
 
 st.title("📁 식품 데이터 탐색")
-st.write("식품 영양 성분 데이터의 내용을 직접 확인할 수 있습니다.")
+st.write("실제 식품 영양 성분 데이터의 내용을 확인합니다.")
 
 try:
     df = load_data()
-
-    st.subheader("전체 데이터 정보")
 
     col1, col2 = st.columns(2)
 
@@ -32,12 +34,10 @@ try:
             filtered_data = df[
                 df["식품대분류명"] == selected_category
             ]
-
     else:
         filtered_data = df
 
     st.subheader("데이터 미리보기")
-
     st.write(f"검색된 데이터: {len(filtered_data):,}개")
 
     st.dataframe(
