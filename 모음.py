@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 from pathlib import Path
@@ -7,10 +6,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
-# 데이터 설정
+
+# 엑셀 파일 위치
 BASE_DIR = Path(__file__).parent
 FILE_PATH = BASE_DIR / "20260828_음식DB_19617건.xlsx"
 
+# 예측할 대상과 영양 성분
 TARGET = "식품대분류명"
 
 FEATURES = [
@@ -22,7 +23,7 @@ FEATURES = [
 ]
 
 
-# 1. 엑셀 데이터 불러오기
+# 엑셀 데이터 불러오기
 @st.cache_data
 def load_data():
     if not FILE_PATH.exists():
@@ -33,37 +34,40 @@ def load_data():
     return pd.read_excel(FILE_PATH)
 
 
-# 2. 데이터 전처리
+# AI 학습에 사용할 데이터 정리
 @st.cache_data
 def prepare_data():
     df = load_data()
 
-    required = FEATURES + [TARGET]
-    missing = [col for col in required if col not in df.columns]
+    required_columns = FEATURES + [TARGET]
+    missing_columns = [
+        col for col in required_columns if col not in df.columns
+    ]
 
-    if missing:
-        raise ValueError(f"필요한 열이 없습니다: {missing}")
+    if missing_columns:
+        raise ValueError(
+            f"엑셀에 필요한 열이 없습니다: {missing_columns}"
+        )
 
-    data = df[required].copy()
+    data = df[required_columns].copy()
 
     for col in FEATURES:
         data[col] = pd.to_numeric(data[col], errors="coerce")
 
     data = data.dropna()
-    data = data[data[TARGET].notna()]
 
-    # 데이터가 10개 미만인 식품 유형 제외
+    # 데이터가 너무 적은 식품 유형은 제외
     counts = data[TARGET].value_counts()
-    valid = counts[counts >= 10].index
-    data = data[data[TARGET].isin(valid)].copy()
+    valid_categories = counts[counts >= 10].index
+    data = data[data[TARGET].isin(valid_categories)]
 
     if data[TARGET].nunique() < 2:
-        raise ValueError("학습할 식품 유형이 2개 이상 필요합니다.")
+        raise ValueError("AI 학습에 필요한 식품 유형이 부족합니다.")
 
     return data
 
 
-# 3. 인공지능 모델 학습
+# AI 모델 학습 및 정확도 계산
 @st.cache_resource
 def get_model():
     data = prepare_data()
